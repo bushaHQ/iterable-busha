@@ -4,13 +4,10 @@ PODS:
     - Flutter
     - Iterable-iOS-SDK
   - Iterable-iOS-SDK (6.4.7)
-  - url_launcher_ios (0.0.1):
-    - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - iterable (from `.symlinks/plugins/iterable/ios`)
-  - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
 
 SPEC REPOS:
   trunk:
@@ -21,14 +18,11 @@ EXTERNAL SOURCES:
     :path: Flutter
   iterable:
     :path: ".symlinks/plugins/iterable/ios"
-  url_launcher_ios:
-    :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   iterable: 4d46375ac1e30e3b7a3adbe32bacc40d4b3a6bea
   Iterable-iOS-SDK: 3e196cba0a21153f849a26a3c26cecb00cfd1bda
-  url_launcher_ios: 839c58cdb4279282219f5e248c3321761ff3c4de
 
 PODFILE CHECKSUM: ef19549a9bc3046e7bb7d2fab4d021637c0c58a3
 

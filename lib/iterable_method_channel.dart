@@ -179,6 +179,8 @@ class MethodChannelIterable extends IterablePlatform {
     );
   }
 
+  
+
   /// Tracks a purchase with order [total] cart [items] and optional [dataFields]
   @override
   void trackPurchase(

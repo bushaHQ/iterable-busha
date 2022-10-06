@@ -95,6 +95,8 @@ abstract class IterablePlatform extends PlatformInterface {
   /// Tracks updates to the cart [items]
   void updateCart(List<IterableCommerceItem> items);
 
+  // void updateSignUp
+
   /// Tracks a purchase with order [total] cart [items] and optional [dataFields]
   void trackPurchase(
     double total,

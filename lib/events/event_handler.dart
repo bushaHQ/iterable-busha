@@ -1,10 +1,6 @@
-// ignore_for_file: deprecated_member_use
-
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:iterable/inapp/inapp_common.dart';
-import 'package:url_launcher/url_launcher.dart' as launcher;
 import 'event_emitter.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -96,15 +92,15 @@ class IterableEventHandler {
       String url, IterableActionContext context, Function callback) {
     bool handledResult = callback(url, context);
     if (handledResult == false) {
-      launcher.canLaunch(url).then((canOpen) => {
-            if (canOpen)
-              {launcher.launch(url)}
-            else
-              {
-                debugPrint("Could not open Url."),
-              },
-            timer?.cancel()
-          },);
+      // canLaunch(url).then((canOpen) => {
+      //       if (canOpen)
+      //         {launch(url)}
+      //       else
+      //         {
+      //           debugPrint("Could not open Url."),
+      //         },
+      //       timer?.cancel()
+      //     },);
     }
   }
 

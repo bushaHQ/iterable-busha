@@ -566,4 +566,8 @@ extension SwiftIterablePlugin: IterableAuthDelegate {
             }
         }
     }
+
+    public func onTokenRegistrationFailed(_ reason: String?){
+      ITBInfo("onTokenRegistrationFailed could not register")
+    }
 }

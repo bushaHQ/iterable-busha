@@ -320,6 +320,12 @@ class MethodChannelIterable extends IterablePlatform {
   }
 
   @override
+  Future<void> registerForPush() async {
+    await methodChannel.invokeMethod('registerForPush');
+  }
+
+
+  @override
   Future<String> nativeMethodCallHandler(MethodCall methodCall) async {
     final arguments = methodCall.arguments as Map<dynamic, dynamic>;
     final argumentsCleaned = sanitizeArguments(arguments);
@@ -333,8 +339,7 @@ class MethodChannelIterable extends IterablePlatform {
     }
   }
 
-  static Map<String, dynamic> sanitizeArguments(
-      Map<dynamic, dynamic> arguments) {
+  Map<String, dynamic> sanitizeArguments(Map<dynamic, dynamic> arguments) {
     final result = arguments;
 
     final data = result['additionalData'];

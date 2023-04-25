@@ -166,9 +166,12 @@ abstract class IterablePlatform extends PlatformInterface {
     IterableInAppDeleteSource source,
   );
 
-  Future<void> checkRecentNotification();
-
   void setNotificationOpenedHandler(OpenedNotificationHandler handler);
 
+  Future<void> checkRecentNotification();
+
   Future<String> nativeMethodCallHandler(MethodCall methodCall);
+
+  Future<void> registerForPush();
+
 }

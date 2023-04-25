@@ -19,6 +19,9 @@ import org.json.JSONObject
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.collections.*
+import android.os.Bundle
+import android.os.Debug
+import com.google.firebase.messaging.*
 
 
 /** IterablePlugin */
@@ -79,6 +82,14 @@ class IterablePlugin: FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAw
       "setAutoDisplayPaused" -> setAutoDisplayPaused(call)
       "handleAppLink" -> handleAppLink(call, result)
       "setAuthToken" -> setAuthToken(call)
+      "registerForPush" -> {
+        IterableApi.getInstance().registerForPush()
+        result.success(null)
+      }
+      "checkRecentNotification" -> {
+        notifyPushNotificationOpened()
+        result.success(null)
+      }
       else -> result.onMain().notImplemented()
   }
   }
@@ -450,6 +461,34 @@ class IterablePlugin: FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAw
         methodChannel.invokeMethod(listener, data)
       }
     }
+  }
+
+  private fun notifyPushNotificationOpened() {
+    val bundleData = IterableApi.getInstance().payloadData
+
+    bundleData?.let {
+      val pushData = clearPushData(it)
+      channel.invokeMethod("openedNotificationHandler", pushData)
+    }
+  }
+
+  private fun clearPushData(bundleData: Bundle): Map<String, Any?> {
+
+    val mapPushData = bundleToMap(bundleData)
+    return NotificationParser().parse(mapPushData)
+  }
+
+  private fun bundleToMap(extras: Bundle): Map<String, Any?> {
+
+    val map: MutableMap<String, Any?> = HashMap()
+    val keySetValue = extras.keySet()
+    val iterator: Iterator<String> = keySetValue.iterator()
+    while (iterator.hasNext()) {
+      val key = iterator.next()
+      map[key] = extras[key]
+    }
+
+    return map
   }
 
 }

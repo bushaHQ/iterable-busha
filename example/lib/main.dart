@@ -102,14 +102,25 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
     });
   }
 
+  /// Call it to register device for current user if calling setEmail or
+  /// setUserId after the app has already launched
+  /// (for example, when a new user logs in)
+  Future<void> registerForPush() async {
+    await Iterable.registerForPush();
+  }
+
   ListView _identityListView() {
     return ListView(
       scrollDirection: Axis.vertical,
       children: <Widget>[
         const Padding(padding: EdgeInsets.all(3.5)),
         IterableButton(
-            title: 'Set Email',
-            onPressed: () => Iterable.setEmail(IterableEnv.email)),
+          title: 'Set Email',
+          onPressed: () {
+            Iterable.setEmail(IterableEnv.email);
+            registerForPush();
+          },
+        ),
         IterableButton(
             title: 'Set User Id',
             onPressed: () => Iterable.setUserId("flutterUserId")),

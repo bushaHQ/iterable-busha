@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:iterable/common.dart';
 import 'package:iterable/inapp/inapp_common.dart';
 import 'package:iterable/inapp/inapp_manager.dart';
@@ -5,19 +6,20 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'iterable_method_channel.dart';
 
+typedef OpenedNotificationHandler = void Function(Map openedResult);
+
 abstract class IterablePlatform extends PlatformInterface {
   /// Constructs a IterablePlatform.
   IterablePlatform() : super(token: _token);
 
   static final _inAppManager = IterableInAppManager();
- 
-
 
   static final Object _token = Object();
 
   static IterablePlatform _instance = MethodChannelIterable();
 
-  static get inAppManager => _inAppManager; 
+  static get inAppManager => _inAppManager;
+
   /// The default instance of [IterablePlatform] to use.
   ///
   /// Defaults to [MethodChannelIterable].
@@ -163,4 +165,13 @@ abstract class IterablePlatform extends PlatformInterface {
     IterableInAppLocation location,
     IterableInAppDeleteSource source,
   );
+
+  void setNotificationOpenedHandler(OpenedNotificationHandler handler);
+
+  Future<void> checkRecentNotification();
+
+  Future<String> nativeMethodCallHandler(MethodCall methodCall);
+
+  Future<void> registerForPush();
+
 }

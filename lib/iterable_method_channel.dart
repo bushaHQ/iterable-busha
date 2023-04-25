@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:iterable/common.dart';
@@ -12,6 +14,7 @@ class MethodChannelIterable extends IterablePlatform {
   static const methodChannel = MethodChannel('iterable');
   static const String pluginVersion = '0.0.1';
   static var events = IterableEventHandler(channel: methodChannel);
+  static OpenedNotificationHandler? _onOpenedNotification;
 
   @override
   Future<String?> getPlatformVersion() async {
@@ -70,6 +73,7 @@ class MethodChannelIterable extends IterablePlatform {
         config.authHandler!,
       );
     }
+    methodChannel.setMethodCallHandler(nativeMethodCallHandler);
     return initialized;
   }
 
@@ -178,8 +182,6 @@ class MethodChannelIterable extends IterablePlatform {
       {'items': itemsList},
     );
   }
-
-  
 
   /// Tracks a purchase with order [total] cart [items] and optional [dataFields]
   @override
@@ -305,5 +307,57 @@ class MethodChannelIterable extends IterablePlatform {
       'location': location.toInt(),
       'source': source.toInt(),
     });
+  }
+
+  @override
+  Future<void> checkRecentNotification() async {
+    await methodChannel.invokeMethod('checkRecentNotification');
+  }
+
+  @override
+  void setNotificationOpenedHandler(OpenedNotificationHandler handler) {
+    _onOpenedNotification = handler;
+  }
+
+  @override
+  Future<void> registerForPush() async {
+    await methodChannel.invokeMethod('registerForPush');
+  }
+
+
+  @override
+  Future<String> nativeMethodCallHandler(MethodCall methodCall) async {
+    final arguments = methodCall.arguments as Map<dynamic, dynamic>;
+    final argumentsCleaned = sanitizeArguments(arguments);
+
+    switch (methodCall.method) {
+      case "openedNotificationHandler":
+        _onOpenedNotification?.call(argumentsCleaned);
+        return "This data from native.....";
+      default:
+        return "Nothing";
+    }
+  }
+
+  Map<String, dynamic> sanitizeArguments(Map<dynamic, dynamic> arguments) {
+    final result = arguments;
+
+    final data = result['additionalData'];
+    data.forEach((key, value) {
+      if (value is String) {
+        if (value[0] == '{' && value[value.length - 1] == '}') {
+          data[key] = _stringJsonToMap(value);
+        }
+      }
+    });
+    result['additionalData'] = data;
+
+    return Map<String, dynamic>.from(result);
+  }
+
+  static Map<dynamic, dynamic> _stringJsonToMap(String stringJson) {
+    final stringClean = stringJson.replaceAll('&quot;', '"');
+
+    return jsonDecode(stringClean) as Map<dynamic, dynamic>;
   }
 }

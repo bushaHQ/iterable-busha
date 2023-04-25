@@ -1,8 +1,9 @@
 import Flutter
 import UIKit
 import IterableSDK
+import UserNotifications
 
-public class SwiftIterablePlugin: NSObject, FlutterPlugin {
+public class SwiftIterablePlugin: NSObject, FlutterPlugin, UNUserNotificationCenterDelegate, IterableCustomActionDelegate {
 
   static var channel: FlutterMethodChannel?
 
@@ -13,6 +14,7 @@ public class SwiftIterablePlugin: NSObject, FlutterPlugin {
       return
     }
     registrar.addMethodCallDelegate(instance, channel: channel)
+    registrar.addApplicationDelegate(instance)
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -77,6 +79,10 @@ public class SwiftIterablePlugin: NSObject, FlutterPlugin {
           setInAppShowResponse(call: call)
       case "setAuthToken":
           setAuthToken(call: call)
+      case "registerForPush":
+          registerForPushNotifications()
+      case "checkRecentNotification":
+         notifyPushNotificationOpened()
       case "wakeApp":
           // Android Only
           print("wakeApp")
@@ -104,6 +110,67 @@ public class SwiftIterablePlugin: NSObject, FlutterPlugin {
           apiEndPointOverride: apiEndPointOverride,
           result: result)
   }
+    
+    public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [AnyHashable : Any] = [:]) -> Bool {
+        UNUserNotificationCenter.current().delegate = self
+        
+        return true
+    }
+    
+    public func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        IterableAPI.register(token: deviceToken)
+    }
+    
+    func registerForPushNotifications() {
+        UNUserNotificationCenter.current()
+            .requestAuthorization(options: [.alert, .sound, .badge]) { [weak self] granted, error in
+                guard granted else { return }
+                
+                DispatchQueue.main.async {
+                    UIApplication.shared.registerForRemoteNotifications()
+                }
+            }
+    }
+    
+    
+    public func userNotificationCenter(_: UNUserNotificationCenter, willPresent _: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.badge, .sound, .alert])
+    }
+    
+    public func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                       didReceive response: UNNotificationResponse,
+                                       withCompletionHandler completionHandler: @escaping () -> Void) {
+        IterableAppIntegration.userNotificationCenter(center, didReceive: response, withCompletionHandler: completionHandler)
+    }
+    
+    public func handle(iterableCustomAction action: IterableAction, inContext context: IterableActionContext) -> Bool {
+        notifyPushNotificationOpened()
+        return true;
+    }
+    
+    
+    public func notifyPushNotificationOpened(){
+        let userInfo = IterableAPI.lastPushPayload
+        
+        if(userInfo != nil){
+            let apsInfo = userInfo!["aps"] as? [String: AnyObject]
+            let alertInfo = apsInfo?["alert"] as? [String: AnyObject]
+            
+            if(alertInfo != nil){
+                
+                let payload = [
+                    "title": alertInfo?["title"] ?? "",
+                    "body": alertInfo?["body"] ?? "",
+                    "additionalData": IterableAPI.lastPushPayload!
+                ] as [String : Any]
+                
+                SwiftIterablePlugin.channel?.invokeMethod("openedNotificationHandler", arguments: payload)
+            }
+            
+        }
+        
+   }
+  
                            
   func setEmail(call: FlutterMethodCall) {
     guard let arguments = call.arguments as? [String: Any] else {
@@ -510,18 +577,18 @@ extension SwiftIterablePlugin: IterableURLDelegate {
     }
 }
 
-extension SwiftIterablePlugin: IterableCustomActionDelegate {
-    public func handle(iterableCustomAction action: IterableAction, inContext context: IterableActionContext) -> Bool {
+// extension SwiftIterablePlugin: IterableCustomActionDelegate {
+//     public func handle(iterableCustomAction action: IterableAction, inContext context: IterableActionContext) -> Bool {
         
-        SwiftIterablePlugin
-          .channel?
-          .invokeMethod("callListener",
-                        arguments: ["action": action.dictionary,
-                        "context": context.dictionary,
-                                    ITBEmitter.emitterName: ITBEmitter.customActionDelegate])
-        return true
-    }
-}
+//         SwiftIterablePlugin
+//           .channel?
+//           .invokeMethod("callListener",
+//                         arguments: ["action": action.dictionary,
+//                         "context": context.dictionary,
+//                                     ITBEmitter.emitterName: ITBEmitter.customActionDelegate])
+//         return true
+//     }
+// }
 
 extension SwiftIterablePlugin: IterableInAppDelegate {
     public func onNew(message: IterableInAppMessage) -> InAppShowResponse {

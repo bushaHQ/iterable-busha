@@ -168,4 +168,16 @@ class Iterable {
       source,
     );
   }
+
+  static Future<void> checkRecentNotification() async {
+    IterablePlatform.instance.checkRecentNotification();
+  }
+
+  static void setNotificationOpenedHandler(OpenedNotificationHandler handler) {
+    IterablePlatform.instance.setNotificationOpenedHandler(handler);
+  }
+
+  static Future<void> registerForPush() async {
+    IterablePlatform.instance.registerForPush();
+  }
 }

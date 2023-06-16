@@ -9,6 +9,8 @@
 .history
 .svn/
 migrate_working_dir/
+.fvm/flutter_sdk
+.fvm/fvm_config.json
 
 # IntelliJ related
 *.iml
@@ -28,3 +30,4 @@ migrate_working_dir/
 .dart_tool/
 .packages
 build/
+example/lib/env.dart

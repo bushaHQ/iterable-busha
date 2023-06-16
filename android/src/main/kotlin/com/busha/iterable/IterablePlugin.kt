@@ -25,7 +25,7 @@ import com.google.firebase.messaging.*
 
 
 /** IterablePlugin */
-class IterablePlugin: FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware, IterableUrlHandler, IterableCustomActionHandler, IterableInAppHandler, IterableAuthHandler {
+class IterablePlugin: FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware, IterableUrlHandler, IterableCustomActionHandler, IterableInAppHandler{
 
   private lateinit var channel : MethodChannel
   private lateinit var context: Context
@@ -120,7 +120,26 @@ class IterablePlugin: FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAw
       }
 
       if (authHandlerPresent) {
-        config.setAuthHandler(this)
+        config.setAuthHandler(object : IterableAuthHandler {
+          override fun onAuthTokenRequested(): String {
+            IterableLogger.printInfo();
+
+            authHandlerCallbackLatch = CountDownLatch(1)
+            invokeOnMain(channel, "callListener", mapOf(EMITTER_NAME to AUTH_DELEGATE))
+
+            authHandlerCallbackLatch?.await(30, TimeUnit.SECONDS)
+            authHandlerCallbackLatch = null
+            return passedAuthToken ?: ""
+          }
+
+          override fun onTokenRegistrationSuccessful(authToken: String) {
+            // Implement the logic for handling successful token registration here
+        }
+
+          override fun onTokenRegistrationFailed(error: Throwable) {
+            // Implement the logic for handling failed token registration here
+        }
+        })
       }
 
       context.let { context ->
@@ -425,18 +444,18 @@ class IterablePlugin: FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAw
 
   }
 
-  override
-  fun onAuthTokenRequested(): String? {
-    IterableLogger.printInfo();
-
-    authHandlerCallbackLatch = CountDownLatch(1)
-    invokeOnMain(channel, "callListener", mapOf(EMITTER_NAME to AUTH_DELEGATE))
-
-    authHandlerCallbackLatch?.await(30, TimeUnit.SECONDS)
-    authHandlerCallbackLatch = null
-    return passedAuthToken
-
-  }
+//  override
+//  fun onAuthTokenRequested(): String? {
+//    IterableLogger.printInfo();
+//
+//    authHandlerCallbackLatch = CountDownLatch(1)
+//    invokeOnMain(channel, "callListener", mapOf(EMITTER_NAME to AUTH_DELEGATE))
+//
+//    authHandlerCallbackLatch?.await(30, TimeUnit.SECONDS)
+//    authHandlerCallbackLatch = null
+//    return passedAuthToken
+//
+//  }
 
   override
   fun onDetachedFromActivity() { }

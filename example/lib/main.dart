@@ -99,6 +99,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
       () => IterableEnv.jwtToken,
     ).catchError((err) {
       debugPrint("Error retrieving JWT from server: $err");
+      return err;
     });
   }
 
@@ -396,7 +397,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   void _logInAppMessages(List<IterableInAppMessage> messages) {
     debugPrint('========= In-App Messages =========');
     messages.asMap().forEach(
-        (index, message) => {developer.log(jsonEncode((message.toJson())))});
+        (index, message) => developer.log(jsonEncode((message.toJson()))));
   }
 
   void _showAlert(String promoCode) {
